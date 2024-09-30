@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Gravity Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .letter {
+            position: absolute;
+            font-size: 40px;
+            font-weight: bold;
+            color: #4285F4;
+            user-select: none;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 10;
+            transition: top 0.3s ease; /* Smooth transition */
+        }
+
+        .search-container input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4285F4;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .search-container button:hover {
+            background-color: #357ae8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <input type="text" placeholder="Search Google or type a URL" />
+        <button>Google Search</button>
+    </div>
+
+    <script>
+        const letters = "Google".split('');
+        const container = document.body;
+        const searchContainer = document.querySelector('.search-container');
+
+        // Function to create falling letters
+        function createFallingLetters() {
+            letters.forEach((letter, index) => {
+                const letterElement = document.createElement('div');
+                letterElement.classList.add('letter');
+                letterElement.textContent = letter;
+
+                // Set random initial position
+                letterElement.style.left = `${Math.random() * 100}vw`;
+                letterElement.style.top = `0vh`;
+
+                container.appendChild(letterElement);
+
+                // Animate falling letters
+                setTimeout(() => {
+                    let position = 0;
+                    const fallSpeed = 2 + Math.random() * 2; // Random speed
+                    const fall = setInterval(() => {
+                        position += fallSpeed;
+                        letterElement.style.top = `${position}vh`;
+                        letterElement.style.transform = `rotate(${Math.random() * 360}deg)`; // Add rotation effect
+
+                        if (position > window.innerHeight - 60) { // Stop before the search bar
+                            clearInterval(fall);
+                            letterElement.style.top = `${window.innerHeight - 60}px`; // Keep it above the search bar
+                        }
+                    }, 30);
+                }, index * 300); // Stagger the falling effect
+
+                // Make letters draggable
+                letterElement.addEventListener('mousedown', (event) => {
+                    const offsetX = event.clientX - letterElement.getBoundingClientRect().left;
+                    const offsetY = event.clientY - letterElement.getBoundingClientRect().top;
+
+                    const dragMove = (e) => {
+                        letterElement.style.left = `${e.clientX - offsetX}px`;
+                        letterElement.style.top = `${e.clientY - offsetY}px`;
+                    };
+
+                    const dragEnd = () => {
+                        window.removeEventListener('mousemove', dragMove);
+                        window.removeEventListener('mouseup', dragEnd);
+                    };
+
+                    window.addEventListener('mousemove', dragMove);
+                    window.addEventListener('mouseup', dragEnd);
+                });
+            });
+
+            // Start the search bar falling effect
+            let searchPosition = 20;
+            const searchFallSpeed = 4;
+            const searchFall = setInterval(() => {
+                searchPosition += searchFallSpeed;
+                searchContainer.style.top = `${searchPosition}px`;
+                if (searchPosition > window.innerHeight - 80) { // Stop before hitting bottom
+                    searchFallSpeed *= -0.5; // Reverse direction and slow down
+                }
+                if (searchPosition <= 20) {
+                    clearInterval(searchFall); // Stop if it reaches the initial position
+                }
+            }, 30);
+        }
+
+        // Start the falling letters effect on page load
+        window.onload = createFallingLetters;
+    </script>
+
+</body>
+</html>
